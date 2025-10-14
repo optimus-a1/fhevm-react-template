@@ -1,14 +1,39 @@
-import { FHE, euint32, externalEuint32 } from "@fhevm/solidity/lib/FHE";
+// packages/fhevm-sdk-core/src/index.ts
 
-// 加密函数：加密明文为密文
-export const encryptUint32 = (value: number): { input: euint32; proof: bytes } => {
-  const encryptedValue = FHE.asEuint32(value); 
-  const proof = FHE.getProof(encryptedValue); 
-  return { input: encryptedValue, proof };
-};
+// 模拟 SDK 核心逻辑
 
-// 解密函数：从合约读取加密数据并解密
-export const decryptUint32 = (encryptedValue: externalEuint32, proof: bytes): number => {
-  const decryptedValue = FHE.fromExternal(encryptedValue, proof); 
-  return decryptedValue.toNumber(); 
-};
+export interface SdkConfig {
+  rpcUrl: string;
+  contractAddress: string;
+  chainId: number;
+}
+
+export async function createFHEVM(config: SdkConfig) {
+  console.log("🧠 Initializing FHEVM SDK with config:", config);
+
+  // 模拟异步初始化（可以未来接实际 RPC）
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  console.log("✅ FHEVM SDK initialized");
+
+  // 返回带有加密与解密功能的对象
+  return {
+    encryptUint32(value: number) {
+      // 模拟加密逻辑
+      const encryptedValue = `enc_${value}_${Math.random().toString(36).substring(2, 8)}`;
+      const proof = `proof_${Date.now()}`;
+      return { encryptedValue, proof };
+    },
+
+    decryptUint32(encryptedValue: string, proof: string) {
+      console.log("🔓 decrypt called:", encryptedValue, proof);
+      try {
+        const parts = encryptedValue.split("_");
+        return Number(parts[1]) || 0;
+      } catch (err) {
+        console.error("解密失败:", err);
+        return 0;
+      }
+    },
+  };
+}
