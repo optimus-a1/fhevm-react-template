@@ -1,6 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { createFHEVM } from "@fhevm/sdk-core";
+import { createFHEVM } from "fhevm-sdk-core";
 import detectEthereumProvider from "@metamask/detect-provider";
 
 export const FHEVMContext = createContext<any>(null);

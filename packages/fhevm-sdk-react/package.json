@@ -12,7 +12,7 @@
     "react-dom": ">=18"
   },
   "dependencies": {
-    "@fhevm/sdk-core": "workspace:*",
+    "fhevm-sdk-core": "workspace:*",
     "@metamask/detect-provider": "^2.0.0"
   },
   "devDependencies": {
