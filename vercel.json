@@ -1,6 +1,6 @@
 {
-  "buildCommand": "pnpm install && pnpm build",
   "installCommand": "pnpm install",
+  "buildCommand": "pnpm build",
   "outputDirectory": "examples/nextjs-demo/.next",
   "framework": "nextjs",
   "env": {
