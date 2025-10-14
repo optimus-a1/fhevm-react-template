@@ -4,6 +4,7 @@
   "outputDirectory": "examples/nextjs-demo/.next",
   "framework": "nextjs",
   "env": {
+    "NODE_VERSION": "20",
     "NEXT_PUBLIC_RPC_URL": "https://ethereum-sepolia.publicnode.com",
     "NEXT_PUBLIC_CONTRACT_ADDRESS": "0x964656ad7aE6D2b502F4467B358aC8C070dBc5Bd"
   }
