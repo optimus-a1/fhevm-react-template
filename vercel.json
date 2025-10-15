@@ -1,5 +1,5 @@
 {
-  "installCommand": "pnpm install --frozen-lockfile",
+  "installCommand": "npm install --legacy-peer-deps",
   "buildCommand": "pnpm build",
   "outputDirectory": "packages/nextjs-demo/.next",
   "framework": "nextjs",
