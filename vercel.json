@@ -1,7 +1,7 @@
 {
-  "installCommand": "pnpm install",
+  "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm build",
-  "outputDirectory": "examples/nextjs-demo/.next",
+  "outputDirectory": "packages/nextjs-demo/.next",
   "framework": "nextjs",
   "env": {
     "NODE_VERSION": "20",
