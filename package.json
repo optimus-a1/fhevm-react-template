@@ -1,7 +1,6 @@
 {
-  "packageManager": "pnpm@9.12.1"
-}
-{
+  "packageManager": "pnpm@9.12.1",
+
   "name": "root",
   "version": "0.4.0",
   "private": true,
@@ -9,11 +8,7 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ]
-  },
+  "workspaces": ["packages/**", "examples/**"],
   "scripts": {
     "chain": "pnpm hardhat:chain",
     "compile": "pnpm hardhat:compile",
@@ -21,7 +16,7 @@
     "deploy:sepolia": "pnpm hardhat:deploy:sepolia && pnpm generate",
     "fork": "pnpm hardhat:fork",
     "format": "pnpm next:format && pnpm hardhat:format",
-    "sdk:build": "pnpm --filter ./packages/fhevm-sdk build",
+    "sdk:build": "pnpm --filter ./packages/fhevm-sdk-core build",
     "sdk:watch": "pnpm --filter ./packages/fhevm-sdk watch",
     "sdk:test": "pnpm --filter ./packages/fhevm-sdk test",
     "sdk:test:watch": "pnpm --filter ./packages/fhevm-sdk test:watch",

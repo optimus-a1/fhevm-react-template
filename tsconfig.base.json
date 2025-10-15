@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@fhevm/sdk-react": ["packages/fhevm-sdk-react/dist"],
+      "fhevm-sdk-core": ["packages/fhevm-sdk-core/dist"]
+    }
+  }
+}
