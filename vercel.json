@@ -1,6 +1,6 @@
 {
-  "installCommand": "npm install --legacy-peer-deps",
-  "buildCommand": "pnpm build",
+  "installCommand": "echo 'Skip install on Vercel (prebuilt packages)'",
+  "buildCommand": "cd packages/nextjs-demo && npm install --legacy-peer-deps && npm run build",
   "outputDirectory": "packages/nextjs-demo/.next",
   "framework": "nextjs",
   "env": {
