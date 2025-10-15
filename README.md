@@ -2,10 +2,9 @@
 
 > **一行简介**：一个**框架无关、可插拔适配器**的 FHEVM SDK 栈，提供最小可用的初始化 / 加密 / 解密能力，以及 React “wagmi-like” 适配层与 Next.js 示例应用。
 
-* **Live Demo**（Vercel 部署，HTTPS）：`https://<your-app>.vercel.app`  ← *请替换*
-* **示例合约地址**（Sepolia）：`0x9F8069282814a1177C1f6b8D7d8f7cC11A663554`  ← *请替换或保留*
-* **演示视频（3–5 分钟）**：`https://youtu.be/<video-id>` ← *请替换*
-
+* **Live Demo**（Vercel 部署，HTTPS）：`https://http://65.21.128.40:3000/`  ← 
+* **示例合约地址**（Sepolia）：`0x9F8069282814a1177C1f6b8D7d8f7cC11A663554`  ← 
+* **演示视频（3–5 分钟）**：`https://www.loom.com/share/097214bec74f4048be40e7d01b940137?sid=4dcf3270-bd37-490e-a8f6-bff3282a047d` ← 
 ---
 
 ## 目录
