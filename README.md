@@ -1,328 +1,257 @@
-# Universal FHEVM SDK (Monorepo)
+# 🌐 Universal FHEVM SDK (Monorepo) / 通用 FHEVM SDK（多包结构）
 
-> **一行简介**：一个**框架无关、可插拔适配器**的 FHEVM SDK 栈，提供最小可用的初始化 / 加密 / 解密能力，以及 React “wagmi-like” 适配层与 Next.js 示例应用。
-
-* **Live Demo**（Vercel 部署，HTTPS）：`https://http://65.21.128.40:3000/`  ← 
-* **示例合约地址**（Sepolia）：`0x9F8069282814a1177C1f6b8D7d8f7cC11A663554`  ← 
-* **演示视频（3–5 分钟）**：`https://www.loom.com/share/097214bec74f4048be40e7d01b940137?sid=4dcf3270-bd37-490e-a8f6-bff3282a047d` ← 
----
-
-## 目录
-
-* [项目结构](#项目结构)
-* [架构图](#架构图)
-* [功能特性](#功能特性)
-* [快速开始（≤ 10 行命令）](#快速开始-≤-10-行命令)
-* [环境变量](#环境变量)
-* [脚本命令](#脚本命令)
-* [核心 API（fhevm-sdk-core）](#核心-api-fhevm-sdk-core)
-* [React 适配（fhevm-sdk-react）](#react-适配-fhevm-sdk-react)
-* [EIP-712 “read-permit” 解密流程](#eip-712-read-permit-解密流程)
-* [Next.js 示例](#nextjs-示例)
-* [测试](#测试)
-* [部署（Vercel）](#部署-vercel)
-* [常见问题 & 排障](#常见问题--排障)
-* [里程碑 / 变更记录](#里程碑--变更记录)
-* [License](#license)
+> **One-line intro / 一句话简介**
+> A **framework-agnostic and pluggable FHEVM SDK stack**, offering minimal initialization, encryption & decryption capabilities, plus a React “wagmi-like” adapter and Next.js demo.
+> 一个**框架无关、可插拔适配层**的 FHEVM SDK 栈，提供最小可用的初始化 / 加密 / 解密功能，并包含 React “wagmi 式”适配层与 Next.js 演示应用。
 
 ---
 
-## 项目结构
+### 🌍 Live Demo
+
+✅ **HTTPS Online Version（Vercel / Docker）**
+👉 [http://65.21.128.40:3000](http://65.21.128.40:3000)
+
+### 🎬 Demo Video
+
+🎥 [Loom Walkthrough (3–5 min)](https://www.loom.com/share/097214bec74f4048be40e7d01b940137?sid=4dcf3270-bd37-490e-a8f6-bff3282a047d)
+
+### 💠 Example Contract
+
+🧾 **Sepolia Testnet:** `0x9F8069282814a1177C1f6b8D7d8f7cC11A663554`
+
+---
+
+## 📚 Table of Contents / 目录
+
+* [Project Structure 项目结构](#project-structure--项目结构)
+* [Architecture 架构图](#architecture--架构图)
+* [Features 功能特性](#features--功能特性)
+* [Quick Start 快速开始](#quick-start--快速开始)
+* [Environment Variables 环境变量](#environment-variables--环境变量)
+* [Scripts 脚本命令](#scripts--脚本命令)
+* [Core API 核心API](#core-api--核心api)
+* [React Adapter 适配层](#react-adapter--适配层)
+* [EIP-712 Read-Permit Flow 授权解密流程](#eip-712-read-permit-flow--授权解密流程)
+* [Next.js Example 示例](#nextjs-example--示例)
+* [Testing 测试](#testing--测试)
+* [Deployment 部署](#deployment--部署)
+* [FAQ & Troubleshooting 常见问题](#faq--troubleshooting--常见问题)
+* [Changelog 变更记录](#changelog--变更记录)
+* [License 许可证](#license--许可证)
+
+---
+
+## 🧩 Project Structure / 项目结构
 
 ```text
 universal-fhevm-sdk/
 ├─ packages/
-│  ├─ fhevm-sdk-core/      # 核心库：纯 TypeScript，无框架依赖
-│  ├─ fhevm-sdk-react/     # React 适配层（hooks / Provider）
-│  └─ (optional adapters)  # viem/ethers 等适配，或 vue/node 等
+│  ├─ fhevm-sdk-core/      # Core TypeScript SDK, framework-agnostic / 核心库
+│  ├─ fhevm-sdk-react/     # React adapter with hooks / React 适配层
+│  └─ (optional adapters)  # ethers/viem/vue/node 等其他适配
 ├─ examples/
-│  └─ nextjs-demo/         # 必做：Next.js 示例，展示 SDK 使用
-├─ scripts/                # 可选：工具脚本（CI、发布等）
-├─ package.json            # workspace 根；聚合脚本
-└─ README.md
+│  └─ nextjs-demo/         # Next.js showcase / 演示应用
+├─ scripts/                # Dev & CI utilities / 开发脚本
+└─ package.json            # pnpm workspace root / 工作区根
 ```
 
-> Monorepo 使用 `pnpm` workspaces：根 `package.json` 声明 `"workspaces": ["packages/*", "examples/*"]`。
+📦 **Monorepo via `pnpm` workspaces**
+根目录定义 `"workspaces": ["packages/*", "examples/*"]`。
 
 ---
 
-## 架构图
+## 🧠 Architecture / 架构图
 
 ```
-             +-----------------------+
-             |   dApps (Any Frontend)|
-             +-----------+-----------+
-                         |
-                 (React Adapter)
-                         v
-             +-----------------------+
-             |  fhevm-sdk-react      |
-             |  - <FHEVMProvider>    |
-             |  - useFHEVM()         |
-             |  - useEncryptedWrite()|
-             |  - useDecryption()    |
-             +-----------+-----------+
-                         |
-                 (Core APIs / TS)
-                         v
-             +-----------------------+
-             |  fhevm-sdk-core       |
-             |  - createFHEVM        |
-             |  - encryptUint32      |
-             |  - encryptBytes       |
-             |  - userDecrypt        |
-             |  - publicDecrypt      |
-             +-----------+-----------+
-                         |
-                 (Blockchain I/O)
-                         v
-             +-----------------------+
-             |  Adapters (viem/ethers)
-             |  - Provider/Signer     |
-             |  - EIP-712 signing     |
-             +-----------------------+
+   +-----------------------------+
+   |   dApps (React/Vue/Node)    |
+   +-------------+---------------+
+                 ↓
+         +---------------+
+         | fhevm-sdk-react|
+         | - Provider     |
+         | - useFHEVM()   |
+         | - useEncrypt() |
+         | - useDecrypt() |
+         +-------+-------+
+                 ↓
+         +---------------+
+         | fhevm-sdk-core |
+         | - createFHEVM  |
+         | - encryptUint32|
+         | - userDecrypt  |
+         | - publicDecrypt|
+         +-------+-------+
+                 ↓
+         +---------------+
+         |  Adapters      |
+         | (viem/ethers)  |
+         +---------------+
 ```
 
-**设计要点**：
+🧩 **设计要点 / Key Design Principles**
 
-* **核心无框架依赖**，React/Vue/Node 通过适配层接入；
-* **可插拔链交互适配**（viem / ethers），核心仅暴露纯函数/类型；
-* **最小 API 面**覆盖初始化、加密、解密（包含 userDecrypt + publicDecrypt）。
+* 核心 SDK **不依赖框架**；
+* 通过 adapter 兼容多前端；
+* EIP-712 授权解密；
+* 支持可插拔链交互实现。
 
 ---
 
-## 功能特性
+## ⚙️ Features / 功能特性
 
-* ✅ **createFHEVM**：基于链 ID / RPC / 上下文初始化 SDK
-* ✅ **encryptUint32 / encryptBytes**：前端加密，返回 `{ input, proof }`
-* ✅ **userDecrypt**（EIP-712 授权）：对链上密文进行“读许可”解密
-* ✅ **publicDecrypt**：无需签名的公共解密路径（合约/上下文允许时）
-* ✅ **React hooks**：`useFHEVM`、`useEncryptedWrite`、`useDecryption`
-* ✅ **Next.js 示例**：连接钱包 → 加密写入 → 读取解密
-* ✅ **打包产物**：ESM + CJS + `.d.ts` 类型声明
+| 功能                               | 描述                                             |
+| -------------------------------- | ---------------------------------------------- |
+| `createFHEVM`                    | 初始化 FHEVM 上下文（RPC、ChainID、Adapter）             |
+| `encryptUint32` / `encryptBytes` | 前端加密明文为密文（proof+input）                         |
+| `userDecrypt`                    | 基于 EIP-712 的用户授权解密                             |
+| `publicDecrypt`                  | 无签名公共解密路径                                      |
+| React Hooks                      | `useFHEVM`、`useEncryptedWrite`、`useDecryption` |
+| Next.js Demo                     | 一键演示连接钱包、加密写入、解密读取                             |
 
 ---
 
-## 快速开始（≤ 10 行命令）
+## 🚀 Quick Start / 快速开始（≤ 10 行命令）
 
 ```bash
-# 1) 克隆你的 fork（务必从官方模板 fork 而来）
-git clone https://github.com/<your-username>/fhevm-react-template.git universal-fhevm-sdk
+git clone https://github.com/optimus-a1/fhevm-react-template.git universal-fhevm-sdk
 cd universal-fhevm-sdk
-
-# 2) 安装 & 构建
-pnpm bootstrap && pnpm build
-
-# 3) 启动示例（Next.js）
-pnpm demo:next
-# 访问 http://localhost:3000 （或 Vercel 部署后的 HTTPS 链接）
+pnpm install
+pnpm build
+pnpm --filter nextjs-demo dev
+# 打开 http://localhost:3000 或部署地址
 ```
 
-> *注意：不是从 fork 提交会被直接淘汰。*
+💡 *Fork from the official Zama template before submission.*
 
 ---
 
-## 环境变量
+## 🔑 Environment Variables / 环境变量
 
-示例应用（`examples/nextjs-demo`）支持如下环境变量：
+`.env.local`:
 
 ```bash
-# .env.local
 NEXT_PUBLIC_RPC_URL=https://rpc.sepolia.org
 NEXT_PUBLIC_CONTRACT_ADDRESS=0x9F8069282814a1177C1f6b8D7d8f7cC11A663554
 ```
 
-在 Vercel 上，将相同键值配置到 **Project → Settings → Environment Variables**。
+在 Vercel 部署时，进入
+**Project → Settings → Environment Variables**
+设置相同变量即可。
 
 ---
 
-## 脚本命令
-
-根 `package.json`：
+## 🧰 Scripts / 脚本命令
 
 ```json
 {
   "scripts": {
     "bootstrap": "pnpm install",
-    "build": "pnpm -r build",                 
-    "contract:compile": "hardhat compile",     
-    "contract:deploy": "hardhat run scripts/deploy.ts --network sepolia",
-    "demo:next": "pnpm --filter nextjs-demo dev"
+    "build": "pnpm -r build",
+    "demo:next": "pnpm --filter nextjs-demo dev",
+    "contract:deploy": "hardhat run scripts/deploy.ts --network sepolia"
   }
 }
 ```
 
-> 如示例包含合约，请根据你的 `hardhat` 配置调整网络与脚本路径。
-
 ---
 
-## 核心 API（`fhevm-sdk-core`）
-
-### `createFHEVM(config)`
+## 🧩 Core API / 核心 API（`fhevm-sdk-core`）
 
 ```ts
-interface FHEVMConfig {
-  chainId: number;
-  rpcUrl: string;
-  // 可选：上下文、适配器注入等
-  adapter?: {
-    // 例如：签名、读写请求、链上读取等
-    signTypedData?: (payload: any) => Promise<string>;
-    read?: (call: any) => Promise<any>;
-    write?: (tx: any) => Promise<any>;
-  };
-}
-
-function createFHEVM(config: FHEVMConfig): Promise<{
-  encryptUint32: (v: number) => Promise<{ input: string; proof: string }>;
-  encryptBytes: (b: Uint8Array) => Promise<{ input: string; proof: string }>;
-  userDecrypt: (args: UserDecryptArgs) => Promise<string | number | Uint8Array>;
-  publicDecrypt: (payload: any) => Promise<string | number | Uint8Array>;
-}>;
+const fhevm = await createFHEVM({ chainId: 11155111, rpcUrl });
+const { input, proof } = await fhevm.encryptUint32(42);
+const result = await fhevm.userDecrypt({ account, payload });
 ```
-
-### `encryptUint32(value)`
-
-* 入参：`number`
-* 出参：`{ input: string; proof: string }`（可直接作为合约 `externalEuintXX` 入参）
-
-### `encryptBytes(data)`
-
-* 入参：`Uint8Array`
-* 出参：`{ input: string; proof: string }`
-
-### `userDecrypt({ account, payload, ... })`
-
-* 行为：发起 **EIP-712** 签名授权，并对链上密文进行“读许可”解密
-* 依赖：`adapter.signTypedData`
-
-### `publicDecrypt(payload)`
-
-* 行为：无需签名的公共解密路径（取决于上下文/合约策略）
-
-> **适配层建议**：将链交互（viem/ethers）做成注入式 adapter，使 `core` 保持纯函数库。
 
 ---
 
-## React 适配（`fhevm-sdk-react`）
-
-### `<FHEVMProvider config={...}>`
-
-在 App 入口初始化 SDK，并通过 Context 下发实例与状态：
+## ⚛️ React Adapter / React 适配层
 
 ```tsx
 <FHEVMProvider config={{ chainId: 11155111, rpcUrl: process.env.NEXT_PUBLIC_RPC_URL! }}>
   <App />
 </FHEVMProvider>
+
+const { fhevm, ready } = useFHEVM();
+const { write } = useEncryptedWrite({ contract, functionName, args });
 ```
-
-### `useFHEVM()`
-
-返回 `{ fhevm, ready, error, account, chainId }`。
-
-### `useEncryptedWrite({ contract, functionName, args, encrypt })`
-
-* 入参明文，hook 内完成 “**加密 → 发交易**”；
-* 返回：`{ write, status, txHash, error }`。
-
-### `useDecryption(payload)`
-
-* 对链上密文执行 `userDecrypt` 或 `publicDecrypt`；
-* 内置缓存与重试（可配置）。
 
 ---
 
-## EIP-712 “read-permit” 解密流程
+## 🔏 EIP-712 Read-Permit Flow / 授权解密流程
 
 ```mermaid
 graph TD
-  A[前端 dApp] -->|请求读取密文| B[FHEVM Provider]
-  B --> C{是否需要授权?}
-  C -- 否 --> D[publicDecrypt]
-  C -- 是 --> E[构造 EIP-712 typedData]
-  E --> F[钱包签名 (signTypedData)]
-  F --> G[userDecrypt with signature]
-  D --> H[明文]
-  G --> H[明文]
+  A[Frontend dApp] -->|Request ciphertext| B[FHEVMProvider]
+  B --> C{Need user auth?}
+  C -- No --> D[publicDecrypt]
+  C -- Yes --> E[signTypedData]
+  E --> F[userDecrypt]
+  D --> G[Decrypted]
+  F --> G[Decrypted]
 ```
 
-**实现要点**：
-
-* typedData 的 `domain.name` / `chainId` / `types` 必须与链上合约期望一致；
-* 处理好 `deadline/nonce`，避免重放；
-* HTTPS 环境或 `http://localhost`，否则注入钱包不可用。
+💡 确保 `domain.chainId` 与合约一致，否则签名失败。
 
 ---
 
-## Next.js 示例
-
-* 页面包含：**Connect / Switch Network**、**Deposit（密文演示）**、**Read Balance（userDecrypt）**、（可选）Transfer；
-* 控制台日志（调试）：SDK 初始化 → 加密输出 → 交易哈希 → 解密结果。
-
-> 本仓库内 `examples/nextjs-demo` 即为最小示例，可直接运行或部署。
-
----
-
-## 测试
-
-使用 `vitest`/`jest` 编写最小单测（建议 2–3 个）：
+## 🧪 Testing / 测试
 
 ```bash
-# 在 core 包内运行测试
 pnpm --filter fhevm-sdk-core test
 ```
 
-**建议用例**：
+建议用例：
 
-* `encryptUint32` 返回对象形状与类型检查；
-* `userDecrypt` 对 mock payload 与签名流程跑通；
-* （可选）端到端：部署最小合约，写入密文后读取解密一次。
-
----
-
-## 部署（Vercel）
-
-1. 推送仓库（Public）；
-2. Vercel → **New Project** → Import 你的 GitHub 仓库；
-3. 设置 Environment Variables：
-
-   * `NEXT_PUBLIC_RPC_URL = https://rpc.sepolia.org`
-   * `NEXT_PUBLIC_CONTRACT_ADDRESS = <你的合约>`
-4. **Deploy**，获得 `https://<your-app>.vercel.app`；
-5. 将链接写入本 README 顶部。
+* `encryptUint32` 输出类型；
+* `userDecrypt` 模拟签名；
+* 可选端到端测试：写密文 → 解密。
 
 ---
 
-## 常见问题 & 排障
+## 🌐 Deployment / 部署（Docker / Vercel）
 
-* **钱包注入失败**：需在 **HTTPS** 或 `http://localhost` 环境。
-* **EIP-712 签名失败**：检查 **domain/chainId/types** 与合约期望是否一致；确保 `deadline/nonce` 设置正确。
-* **Next.js 警告：allowedDevOrigins**：在 `next.config.mjs` 添加：
+### 🐳 Docker
 
-  ```js
-  export default {
-    experimental: { allowedDevOrigins: ["http://<your-ip>:3000"] },
-  }
-  ```
-* **不是从 fork 提交**：会被直接淘汰。请确保仓库保留 `fork` 关系与 `upstream`。
+```bash
+docker build -t fhevm-app .
+docker run -d -p 3000:3000 fhevm-app
+```
 
----
+→ 打开 [http://65.21.128.40:3000](http://65.21.128.40:3000)
 
-## 里程碑 / 变更记录
+### ▲ Vercel
 
-* **v0.1.0**：
-
-  * Monorepo 初始化；
-  * `fhevm-sdk-core`：createFHEVM / encrypt / userDecrypt / publicDecrypt；
-  * `fhevm-sdk-react`：Provider + hooks；
-  * Next.js 示例 + 一键脚本；
-  * ESM + CJS + `.d.ts` 产物。
+1. Fork 并导入到 Vercel
+2. 设置环境变量
+3. 点击 **Deploy**
 
 ---
 
-## License
+## 🧭 FAQ & Troubleshooting / 常见问题
 
-MIT
+| 问题         | 解决方案                           |
+| ---------- | ------------------------------ |
+| 钱包未注入      | 使用 HTTPS 或 localhost           |
+| EIP-712 失败 | 检查 `domain.name/chainId/types` |
+| 连接失败       | 重新初始化 SDK 或刷新 RPC              |
+| Fork 检查失败  | 保持 upstream 关联                 |
 
 ---
+
+## 🧾 Changelog / 变更记录
+
+| 版本         | 内容                                               |
+| ---------- | ------------------------------------------------ |
+| **v0.1.0** | 初始化 Monorepo，构建 core/react/next 示例，支持 EIP-712 解密 |
+
+---
+
+## 📜 License / 许可证
+
+MIT License © 2025 optimus-a1
+
+---
+
 
